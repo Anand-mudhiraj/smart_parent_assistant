@@ -8,126 +8,125 @@ class SituationScreen extends StatefulWidget {
 }
 
 class _SituationScreenState extends State<SituationScreen> {
-  String sleep = 'Well';
-  String feeding = 'Less than 1 hour';
-
-  String ageGroup = ''; // ✅ stored safely
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    final args =
-        ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
-    ageGroup = args['age']; // ✅ guaranteed once
-  }
-
-  void analyzeSituation() {
-    String reason;
-    List<String> suggestions = [];
-    bool consultDoctor = false;
-
-    // 🧠 AGE-AWARE RULE-BASED LOGIC
-    if (sleep == 'Not well' && feeding == 'More than 2 hours') {
-      reason = 'Possible hunger and fatigue';
-
-      if (ageGroup == '0–6 months') {
-        suggestions = [
-          'Feed the child immediately',
-          'Help the child rest in a calm place',
-          'Monitor crying closely after feeding',
-        ];
-        consultDoctor = true;
-      } else {
-        suggestions = [
-          'Offer food or milk',
-          'Ensure proper rest',
-          'Engage the child calmly and observe behavior',
-        ];
-      }
-    } else if (feeding == 'More than 2 hours') {
-      reason = 'Possible hunger';
-      suggestions = [
-        'Feed the child',
-        'Check feeding schedule',
-        'Burp the child after feeding',
-      ];
-    } else if (sleep == 'Not well') {
-      reason = 'Possible tiredness or discomfort';
-      suggestions = [
-        'Help the child sleep',
-        'Reduce noise and light',
-        'Comfort the child gently',
-      ];
-    } else {
-      reason = 'General discomfort';
-      suggestions = [
-        'Check diaper condition',
-        'Ensure comfortable clothing',
-        'Hold and comfort the child',
-      ];
-    }
-
-    Navigator.pushNamed(
-      context,
-      '/result',
-      arguments: {
-        'reason': reason,
-        'suggestions': suggestions,
-        'consultDoctor': consultDoctor,
-      },
-    );
-  }
+  String sleep = 'Sleeping well';
+  String feedingTime = 'Less than 1 hour';
+  String crying = 'Mild';
+  String discomfort = 'None';
+  String temperature = 'Normal';
 
   @override
   Widget build(BuildContext context) {
+    final args = ModalRoute.of(context)!.settings.arguments as Map;
+    final String age = args['age'];
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Child Situation')),
-      body: Padding(
+      appBar: AppBar(title: const Text('Current Situation')),
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            Card(
-              child: ListTile(
-                title: const Text('Sleep Quality'),
-                trailing: DropdownButton<String>(
-                  value: sleep,
-                  items: ['Well', 'Not well']
-                      .map((e) =>
-                          DropdownMenuItem(value: e, child: Text(e)))
-                      .toList(),
-                  onChanged: (v) => setState(() => sleep = v!),
-                ),
-              ),
+            _buildDropdown(
+              label: 'Sleep Quality',
+              value: sleep,
+              items: const [
+                'Sleeping well',
+                'Light sleep',
+                'Not sleeping',
+              ],
+              onChanged: (v) => setState(() => sleep = v),
             ),
-            const SizedBox(height: 20),
-            Card(
-              child: ListTile(
-                title: const Text('Last Feeding Time'),
-                trailing: DropdownButton<String>(
-                  value: feeding,
-                  items: [
-                    'Less than 1 hour',
-                    '1–2 hours',
-                    'More than 2 hours'
-                  ]
-                      .map((e) =>
-                          DropdownMenuItem(value: e, child: Text(e)))
-                      .toList(),
-                  onChanged: (v) => setState(() => feeding = v!),
-                ),
-              ),
+            _buildDropdown(
+              label: 'Last Feeding Time',
+              value: feedingTime,
+              items: const [
+                'Less than 1 hour',
+                '1–3 hours',
+                'More than 3 hours',
+              ],
+              onChanged: (v) => setState(() => feedingTime = v),
             ),
-            const Spacer(),
+            _buildDropdown(
+              label: 'Crying Intensity',
+              value: crying,
+              items: const [
+                'Mild',
+                'Moderate',
+                'Continuous / loud',
+              ],
+              onChanged: (v) => setState(() => crying = v),
+            ),
+            _buildDropdown(
+              label: 'Visible Discomfort',
+              value: discomfort,
+              items: const [
+                'None',
+                'Pulling ears',
+                'Stomach tight / gas',
+                'Skin irritation / rash',
+              ],
+              onChanged: (v) => setState(() => discomfort = v),
+            ),
+            _buildDropdown(
+              label: 'Body Temperature (Touch)',
+              value: temperature,
+              items: const [
+                'Normal',
+                'Feels warm',
+                'Feels hot',
+              ],
+              onChanged: (v) => setState(() => temperature = v),
+            ),
+            const SizedBox(height: 24),
             SizedBox(
               width: double.infinity,
-              height: 50,
-              child: ElevatedButton(
-                onPressed: analyzeSituation,
-                child: const Text('Analyze'),
+              child: ElevatedButton.icon(
+                icon: const Icon(Icons.analytics),
+                label: const Text('Analyze'),
+                onPressed: () {
+                  Navigator.pushNamed(
+                    context,
+                    '/result',
+                    arguments: {
+                      'age': age,
+                      'sleep': sleep,
+                      'feedingTime': feedingTime,
+                      'crying': crying,
+                      'discomfort': discomfort,
+                      'temperature': temperature,
+                    },
+                  );
+                },
               ),
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildDropdown({
+    required String label,
+    required String value,
+    required List<String> items,
+    required Function(String) onChanged,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: DropdownButtonFormField<String>(
+        value: value,
+        decoration: InputDecoration(
+          labelText: label,
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+        ),
+        items: items
+            .map(
+              (e) => DropdownMenuItem(
+                value: e,
+                child: Text(e),
+              ),
+            )
+            .toList(),
+        onChanged: (v) => onChanged(v!),
       ),
     );
   }
