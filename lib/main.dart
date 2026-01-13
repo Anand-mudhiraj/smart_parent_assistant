@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import 'screens/home_screen.dart';
 import 'screens/child_info_screen.dart';
 import 'screens/situation_screen.dart';
@@ -21,15 +20,17 @@ class SmartParentAssistantApp extends StatelessWidget {
       theme: ThemeData(
         useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),
-        scaffoldBackgroundColor: const Color(0xFFF6F8FA),
+        scaffoldBackgroundColor: const Color(0xFFF7FAFC),
         appBarTheme: const AppBarTheme(
           centerTitle: true,
-          elevation: 0,
+          backgroundColor: Colors.teal,
+          foregroundColor: Colors.white,
         ),
       ),
-      home: const HomeScreen(),
+      initialRoute: '/',
       routes: {
-        '/child-info': (context) => const ChildInfoScreen(),
+        '/': (context) => const HomeScreen(),
+        '/child': (context) => const ChildInfoScreen(),
         '/situation': (context) => const SituationScreen(),
         '/result': (context) => const ResultScreen(),
         '/health': (context) => const HealthScreen(),

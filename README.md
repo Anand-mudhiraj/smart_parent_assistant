@@ -1,16 +1,26 @@
-# smart_parent_assistant
+# Smart Parent Assistant 👶📱
 
-A new Flutter project.
+Smart Parent Assistant is a Flutter-based mobile application designed to help parents understand possible reasons behind a child's discomfort or crying and provide appropriate guidance.
 
-## Getting Started
+## 🎯 Objective
+To assist parents—especially new parents—in identifying basic child needs and knowing when to consult a doctor.
 
-This project is a starting point for a Flutter application.
+## ✨ Features
+- Child age & gender input
+- Situation-based analysis
+- Rule-based intelligent suggestions
+- Doctor alert for critical cases
+- Clean and simple UI
+- Offline-friendly logic
 
-A few resources to get you started if this is your first Flutter project:
+## 🛠️ Tech Stack
+- Flutter
+- Dart
+- Android
+- Git & GitHub
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+## 🚀 Project Status
+College Project – Fully Functional Prototype
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## 📌 Disclaimer
+This app provides guidance only and does **not replace medical advice**.

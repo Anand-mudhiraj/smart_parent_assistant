@@ -5,8 +5,9 @@ class HealthScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Center(
+    return Scaffold(
+      appBar: AppBar(title: const Text('Health Indicators')),
+      body: const Center(
         child: Text(
           'Health Indicators\n(Coming Soon)',
           textAlign: TextAlign.center,
