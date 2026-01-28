@@ -10,7 +10,7 @@ To assist parents—especially new parents—in identifying basic child needs an
 - Situation-based analysis
 - Rule-based intelligent suggestions
 - Doctor alert for critical cases.
-- Clean and simple UI
+- Clean and simple UI.
 - Offline-friendly logic
 
 ## 🛠️ Tech Stack
