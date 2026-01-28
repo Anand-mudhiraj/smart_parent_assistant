@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../services/ml_service.dart';
+import 'result_screen.dart';
 
 class SituationScreen extends StatefulWidget {
   const SituationScreen({super.key});
@@ -8,123 +10,117 @@ class SituationScreen extends StatefulWidget {
 }
 
 class _SituationScreenState extends State<SituationScreen> {
-  String sleep = 'Sleeping well';
-  String feedingTime = 'Less than 1 hour';
-  String crying = 'Mild';
-  String discomfort = 'None';
-  String temperature = 'Normal';
+  String sleepQuality = "Sleeping well";
+  String feedingTime = "Less than 1 hour";
+  String crying = "Mild";
+  String discomfort = "None";
+  String temperature = "Normal";
+
+  bool isLoading = false;
+
+  Future<void> analyze() async {
+    setState(() => isLoading = true);
+
+    try {
+      final result = MLService.predict(
+        ageGroup: 1,
+        feedingGap: feedingTime == "Less than 1 hour" ? 0 : 2,
+        sleepOk: sleepQuality == "Sleeping well" ? 1 : 0,
+        cryLevel: crying == "Mild"
+            ? 1
+            : crying == "Medium"
+                ? 2
+                : 3,
+        discomfort: discomfort == "None" ? 0 : 1,
+        temp: temperature == "Normal" ? 0 : 1,
+      );
+
+      if (!mounted) return;
+
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => ResultScreen(result: result),
+        ),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Analysis failed")),
+      );
+    } finally {
+      setState(() => isLoading = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final args = ModalRoute.of(context)!.settings.arguments as Map;
-    final String age = args['age'];
-
     return Scaffold(
-      appBar: AppBar(title: const Text('Current Situation')),
-      body: SingleChildScrollView(
+      appBar: AppBar(
+        title: const Text("Current Situation"),
+        backgroundColor: Colors.teal,
+      ),
+      body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            _buildDropdown(
-              label: 'Sleep Quality',
-              value: sleep,
-              items: const [
-                'Sleeping well',
-                'Light sleep',
-                'Not sleeping',
-              ],
-              onChanged: (v) => setState(() => sleep = v),
-            ),
-            _buildDropdown(
-              label: 'Last Feeding Time',
-              value: feedingTime,
-              items: const [
-                'Less than 1 hour',
-                '1–3 hours',
-                'More than 3 hours',
-              ],
-              onChanged: (v) => setState(() => feedingTime = v),
-            ),
-            _buildDropdown(
-              label: 'Crying Intensity',
-              value: crying,
-              items: const [
-                'Mild',
-                'Moderate',
-                'Continuous / loud',
-              ],
-              onChanged: (v) => setState(() => crying = v),
-            ),
-            _buildDropdown(
-              label: 'Visible Discomfort',
-              value: discomfort,
-              items: const [
-                'None',
-                'Pulling ears',
-                'Stomach tight / gas',
-                'Skin irritation / rash',
-              ],
-              onChanged: (v) => setState(() => discomfort = v),
-            ),
-            _buildDropdown(
-              label: 'Body Temperature (Touch)',
-              value: temperature,
-              items: const [
-                'Normal',
-                'Feels warm',
-                'Feels hot',
-              ],
-              onChanged: (v) => setState(() => temperature = v),
-            ),
-            const SizedBox(height: 24),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                icon: const Icon(Icons.analytics),
-                label: const Text('Analyze'),
-                onPressed: () {
-                  Navigator.pushNamed(
-                    context,
-                    '/result',
-                    arguments: {
-                      'age': age,
-                      'sleep': sleep,
-                      'feedingTime': feedingTime,
-                      'crying': crying,
-                      'discomfort': discomfort,
-                      'temperature': temperature,
-                    },
-                  );
-                },
-              ),
-            ),
+            _dropdown("Sleep Quality", sleepQuality,
+                ["Sleeping well", "Not sleeping well"],
+                (v) => setState(() => sleepQuality = v)),
+
+            _dropdown("Last Feeding Time", feedingTime,
+                ["Less than 1 hour", "1 - 2 hours", "More than 2 hours"],
+                (v) => setState(() => feedingTime = v)),
+
+            _dropdown("Crying Intensity", crying,
+                ["Mild", "Medium", "High"],
+                (v) => setState(() => crying = v)),
+
+            _dropdown("Visible Discomfort", discomfort,
+                ["None", "Yes"],
+                (v) => setState(() => discomfort = v)),
+
+            _dropdown("Body Temperature", temperature,
+                ["Normal", "High"],
+                (v) => setState(() => temperature = v)),
+
+            const SizedBox(height: 30),
+
+            isLoading
+                ? const CircularProgressIndicator()
+                : ElevatedButton.icon(
+                    onPressed: analyze,
+                    icon: const Icon(Icons.analytics),
+                    label: const Text("Analyze"),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.teal,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 40, vertical: 14),
+                    ),
+                  )
           ],
         ),
       ),
     );
   }
 
-  Widget _buildDropdown({
-    required String label,
-    required String value,
-    required List<String> items,
-    required Function(String) onChanged,
-  }) {
+  Widget _dropdown(
+    String label,
+    String value,
+    List<String> items,
+    ValueChanged<String> onChanged,
+  ) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.symmetric(vertical: 8),
       child: DropdownButtonFormField<String>(
         value: value,
         decoration: InputDecoration(
           labelText: label,
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(14),
+          ),
         ),
         items: items
-            .map(
-              (e) => DropdownMenuItem(
-                value: e,
-                child: Text(e),
-              ),
-            )
+            .map((e) => DropdownMenuItem(value: e, child: Text(e)))
             .toList(),
         onChanged: (v) => onChanged(v!),
       ),

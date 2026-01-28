@@ -1,0 +1,5 @@
+Hungry
+Sleepy
+Needs comfort
+Discomfort
+Fever

@@ -2,38 +2,32 @@ import 'package:flutter/material.dart';
 import 'screens/home_screen.dart';
 import 'screens/child_info_screen.dart';
 import 'screens/situation_screen.dart';
-import 'screens/result_screen.dart';
-import 'screens/health_screen.dart';
+import 'services/ml_service.dart';
 
-void main() {
-  runApp(const SmartParentAssistantApp());
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await MLService.loadModel();
+  runApp(const MyApp());
 }
 
-class SmartParentAssistantApp extends StatelessWidget {
-  const SmartParentAssistantApp({super.key});
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      debugShowCheckedModeBanner: false,
       title: 'Smart Parent Assistant',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
+        primarySwatch: Colors.teal,
         useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),
-        scaffoldBackgroundColor: const Color(0xFFF7FAFC),
-        appBarTheme: const AppBarTheme(
-          centerTitle: true,
-          backgroundColor: Colors.teal,
-          foregroundColor: Colors.white,
-        ),
       ),
       initialRoute: '/',
       routes: {
         '/': (context) => const HomeScreen(),
         '/child': (context) => const ChildInfoScreen(),
         '/situation': (context) => const SituationScreen(),
-        '/result': (context) => const ResultScreen(),
-        '/health': (context) => const HealthScreen(),
+        // ❌ NO '/result' HERE
       },
     );
   }
