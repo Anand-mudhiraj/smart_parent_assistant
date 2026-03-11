@@ -12,7 +12,7 @@ if supabase_url and supabase_key:
     supabase = create_client(supabase_url, supabase_key)
 
 try:
-    import tflite_runtime.interpreter as tflite
+    import ai_edge_litert.interpreter as tflite
 except ImportError:
     from tensorflow import lite as tflite
 
