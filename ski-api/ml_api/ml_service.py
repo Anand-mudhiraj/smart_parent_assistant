@@ -6,7 +6,6 @@ from supabase import create_client, Client
 supabase_url = os.environ.get('SUPABASE_URL')
 supabase_key = os.environ.get('SUPABASE_KEY')
 
-# Only initialize if keys are present (prevents local crashes if .env is missing)
 supabase: Client = None
 if supabase_url and supabase_key:
     supabase = create_client(supabase_url, supabase_key)
@@ -51,7 +50,6 @@ def predict_reason(input_data):
     confidence_score = float(predictions[winning_index])
     predicted_reason = REASON_CLASSES.get(winning_index, "Unknown Reason")
     
-    # --- NEW: Log to Supabase ---
     if supabase:
         try:
             supabase.table('ai_predictions').insert({
@@ -64,7 +62,7 @@ def predict_reason(input_data):
                 "confidence": confidence_score
             }).execute()
         except Exception as e:
-            print(f"Supabase logging failed: {e}")
+            print(f"Supabase error: {e}")
             
     return {
         "prediction": predicted_reason,
