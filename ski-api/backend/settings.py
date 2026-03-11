@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-1kgd7lvfx-i4rxz-v2%zxve1h++mn)$e2md1&69#wdu0f=1z^c
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['smartparentassistant.vercel.app', 'localhost', '127.0.0.1', '.vercel.app']
 
 
 # Application definition
