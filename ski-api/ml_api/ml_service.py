@@ -2,7 +2,6 @@ import os
 import numpy as np
 from supabase import create_client, Client
 
-# Safe Supabase Init
 supabase_url = os.environ.get("SUPABASE_URL")
 supabase_key = os.environ.get("SUPABASE_KEY")
 supabase: Client = None
@@ -11,66 +10,45 @@ if supabase_url and supabase_key:
     try:
         supabase = create_client(supabase_url, supabase_key)
     except Exception as e:
-        print(f"?? Supabase Init Error (Check your Keys!): {e}")
+        print(f"Supabase Init Error: {e}")
 
 try:
     import ai_edge_litert.interpreter as tflite
 except ImportError:
     from tensorflow import lite as tflite
 
-MODEL_PATH = os.path.join(os.path.dirname(__file__), "ml_models", "child_reason.tflite")
+MODEL_PATH = os.path.join(os.path.dirname(__file__), "ml_models", "child_reason_advanced.tflite")
 
 REASON_CLASSES = {
-    0: "Hunger or Thirst", 1: "Fatigue or Lack of Sleep",
-    2: "Overstimulation", 3: "Seeking Attention or Connection",
-    4: "Testing Boundaries / Independence", 5: "Physical Discomfort or Illness"
+    0: "Hungry", 1: "Sleepy / Overstimulated",
+    2: "Diaper Change Needed", 3: "Gas / Colic Pain",
+    4: "Sickness / Fever", 5: "Respiratory Distress", 6: "General Discomfort"
 }
 
-def load_model():
+def predict_reason(input_data):
     interpreter = tflite.Interpreter(model_path=MODEL_PATH)
     interpreter.allocate_tensors()
-    return interpreter
-
-def preprocess_input(input_data):
-    f1 = float(input_data.get("feature_1", 0.0))
-    f2 = float(input_data.get("feature_2", 0.0))
-    f3 = float(input_data.get("feature_3", 0.0))
-    f4 = float(input_data.get("feature_4", 0.0))
-    f5 = float(input_data.get("feature_5", 0.0))
-    return np.array([[f1, f2, f3, f4, f5]], dtype=np.float32)
-
-def predict_reason(input_data):
-    # 1. Load Model & Predict
-    interpreter = load_model()
-    input_details = interpreter.get_input_details()
-    output_details = interpreter.get_output_details()
+    in_det = interpreter.get_input_details()[0]
+    out_det = interpreter.get_output_details()[0]
     
-    input_tensor = preprocess_input(input_data)
-    interpreter.set_tensor(input_details[0]["index"], input_tensor)
+    # Extract 10 features
+    features = [float(input_data.get(f"f{i}", 0.0)) for i in range(1, 11)]
+    input_tensor = np.array([features], dtype=np.float32)
+    
+    interpreter.set_tensor(in_det['index'], input_tensor)
     interpreter.invoke()
     
-    predictions = interpreter.get_tensor(output_details[0]["index"])[0]
-    winning_index = int(np.argmax(predictions))
-    confidence_score = float(predictions[winning_index])
-    predicted_reason = REASON_CLASSES.get(winning_index, "Unknown Reason")
+    preds = interpreter.get_tensor(out_det['index'])[0]
+    win_idx = int(np.argmax(preds))
+    conf = float(preds[win_idx])
+    reason = REASON_CLASSES.get(win_idx, "Unknown")
     
-    # 2. Attempt Supabase Log (but don't crash if it fails)
     if supabase:
         try:
             supabase.table("ai_predictions").insert({
-                "feature_1": float(input_tensor[0][0]),
-                "feature_2": float(input_tensor[0][1]),
-                "feature_3": float(input_tensor[0][2]),
-                "feature_4": float(input_tensor[0][3]),
-                "feature_5": float(input_tensor[0][4]),
-                "predicted_reason": predicted_reason,
-                "confidence": confidence_score
+                "feature_1": features[0], "feature_2": features[1],
+                "predicted_reason": reason, "confidence": conf
             }).execute()
-        except Exception as e:
-            print(f"? Supabase Insert Failed: {e}")
+        except: pass
             
-    return {
-        "prediction": predicted_reason,
-        "confidence_percentage": round(confidence_score * 100, 2),
-        "class_id": winning_index
-    }
+    return { "prediction": reason, "confidence_percentage": round(conf * 100, 2), "class_id": win_idx }
