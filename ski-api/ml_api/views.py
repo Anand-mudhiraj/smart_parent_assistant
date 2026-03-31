@@ -12,7 +12,7 @@ def analyze_situation(request):
         # 2. Pass it to your ML model logic
         result = predict_reason(parent_input)
         
-        # 3. Send the response back
+        # 3. Send the response back to Flutter
         return Response({
             "status": "success",
             "data": result
