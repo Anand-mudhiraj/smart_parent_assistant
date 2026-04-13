@@ -6,7 +6,7 @@ import 'package:image_picker/image_picker.dart';
 
 class AppServices {
   static final _supabase = Supabase.instance.client;
-  static const String _mlUrl = 'https://smartparentassistant.vercel.app/api/analyze/';
+  static const String _mlUrl = 'http://127.0.0.1:8000/api/analyze/';
 
   static User? get currentUser => _supabase.auth.currentUser;
   

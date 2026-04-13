@@ -6,7 +6,7 @@ class MLService {
   // - Use '10.0.2.2' if testing on an Android Emulator.
   // - Use your computer's local IP (e.g., '192.168.1.x') if testing on a physical phone.
   // - We will swap this out for the Vercel URL once we deploy!
-  static const String _baseUrl = 'https://smartparentassistant.vercel.app/api/analyze/';
+  static const String _baseUrl = 'http://127.0.0.1:8000/api/analyze/';
 
   Future<Map<String, dynamic>> analyzeBehavior({
     required double feature1,
@@ -16,13 +16,13 @@ class MLService {
     required double feature5,
   }) async {
     try {
-      // 1. Prepare the exact 5 features the Django API expects
+      // 1. Prepare the exact features the Django API expects
       final Map<String, dynamic> requestData = {
-        'feature_1': feature1,
-        'feature_2': feature2,
-        'feature_3': feature3,
-        'feature_4': feature4,
-        'feature_5': feature5,
+        'f1': feature1,
+        'f2': feature2,
+        'f3': feature3,
+        'f4': feature4,
+        'f5': feature5,
       };
 
       // 2. Send the POST request

@@ -70,3 +70,8 @@ ios/.symlinks/
 # Logs
 *.log
 
+# Backend exclusions
+ski-api/.env
+ski-api/venv/
+ski-api/db.sqlite3
+
